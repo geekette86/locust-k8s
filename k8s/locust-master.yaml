@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: locust-master-svc
+  labels:
+    app.kubernetes.io/name: locust
+    app.kubernetes.io/component: master
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8089
+      protocol: TCP
+      targetPort: 8089
+      name: master-web
+    - port: 5557
+      protocol: TCP
+      name: master-p1
+    - port: 5558
+      protocol: TCP
+      name: master-p2
+  selector:
+    app.kubernetes.io/name: locust
+    app.kubernetes.io/component: master 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: locust-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: locust
+      app.kubernetes.io/component: master
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: locust
+        app.kubernetes.io/component: master
+    spec:
+      containers:
+        - name: locust-master
+          image: YOUR_DOCKER_REGISTERY/locust:1.0.2
+          env:
+            - name: LOCUST_MODE
+              value: master
+            - name: LOCUST_TARGET_HOST
+              value: "https://example.com"
+          ports:
+            - containerPort: 8089
+              protocol: TCP
+            - containerPort: 5557
+            - containerPort: 5558
+          resources:
+            limits:
+              cpu: 150m
+              memory: 1Gi
+            requests:
+              cpu: 150m
+              memory: 1Gi

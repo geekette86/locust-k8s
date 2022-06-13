@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.allow-http: "true"
+    kubernetes.io/ingress.class: "nginx"
+    ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+  name: locust-ingress
+spec:
+  tls:
+    - hosts:
+      - locust.host.com
+      secretName: locust-certificate
+  rules:
+    - host: locust.host.com
+        paths:
+          - backend:
+              serviceName: locust-master-svc
+              servicePort: 8089
+status:
+  loadBalancer: {}
